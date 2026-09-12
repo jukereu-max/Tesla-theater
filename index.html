@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Nightshift — Parked-Mode Theatre</title>
+<style>
+  :root{
+    --bg-0:#0b1020;--bg-1:#131b31;--bg-2:#1a2440;
+    --ink:#eaf0ff;--muted:#8a96b8;--line:rgba(160,178,224,.14);
+    --marquee:#ffb84d;--marquee-deep:#e08a2b;--radius:22px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(120% 90% at 78% -10%, #223056 0%, rgba(34,48,86,0) 55%),
+      radial-gradient(90% 70% at 8% 110%, #1c2647 0%, rgba(28,38,71,0) 60%),
+      var(--bg-0);
+    min-height:100dvh;-webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;padding:clamp(16px,2.4vw,34px);
+  }
+  .wrap{max-width:1500px;margin:0 auto;}
+  header{display:flex;align-items:center;gap:20px;padding:6px 4px 22px;
+    border-bottom:1px solid var(--line);margin-bottom:22px;}
+  .brand{display:flex;align-items:center;gap:14px;margin-right:auto;}
+  .bulbs{display:flex;gap:7px;}
+  .bulbs i{width:11px;height:11px;border-radius:50%;background:var(--marquee);
+    box-shadow:0 0 10px 1px rgba(255,184,77,.7);animation:flick 2.6s infinite;}
+  .bulbs i:nth-child(2){animation-delay:.5s}
+  .bulbs i:nth-child(3){animation-delay:1s}
+  @keyframes flick{0%,92%,100%{opacity:1}94%{opacity:.35}}
+  .brand h1{font-size:clamp(20px,2.5vw,30px);letter-spacing:.14em;font-weight:800;margin:0;line-height:1;}
+  .brand span{display:block;font-size:11px;letter-spacing:.34em;color:var(--muted);font-weight:600;margin-top:6px;}
+  .clock{font-variant-numeric:tabular-nums;font-size:clamp(22px,2.8vw,34px);font-weight:700;letter-spacing:.04em;}
+  .clock small{display:block;text-align:right;font-size:11px;letter-spacing:.22em;color:var(--muted);font-weight:600;margin-top:4px;}
+  .btn{border:1px solid var(--line);background:var(--bg-1);color:var(--ink);font:inherit;font-weight:650;font-size:16px;
+    padding:15px 22px;border-radius:16px;cursor:pointer;display:inline-flex;align-items:center;gap:10px;
+    transition:transform .12s ease,background .2s ease,border-color .2s ease;}
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:linear-gradient(180deg,var(--marquee),var(--marquee-deep));border-color:transparent;color:#20160a;
+    box-shadow:0 8px 22px -8px rgba(255,184,77,.6);}
+  .btn svg{width:20px;height:20px;display:block}
+  .controls{display:flex;gap:12px;align-items:center}
+  .wx{display:flex;align-items:center;gap:11px;cursor:pointer;padding:6px 4px;border-radius:12px;transition:background .2s ease}
+  .wx:active{background:var(--bg-1)}
+  .wx-ico{width:36px;height:36px;display:grid;place-items:center}
+  .wx-ico svg{width:34px;height:34px;display:block}
+  .wx-meta{line-height:1.05}
+  .wx-meta span{font-size:clamp(20px,2.4vw,28px);font-weight:700;font-variant-numeric:tabular-nums}
+  .wx-meta small{display:block;font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:600;margin-top:3px;text-transform:uppercase;max-width:96px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wxstrip{display:flex;gap:12px;margin:0 2px 26px;flex-wrap:wrap}
+  .wxstrip:empty{display:none}
+  .wxday{display:flex;flex-direction:column;align-items:center;gap:9px;background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:16px;padding:14px 22px;min-width:106px}
+  .wxday b{font-size:11px;letter-spacing:.15em;color:var(--muted);font-weight:700}
+  .wxday-ico svg{width:30px;height:30px;display:block}
+  .wxday .tmp{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+  .wxday .tmp i{color:var(--muted);font-style:normal;font-weight:600;margin-left:8px;font-size:15px}
+  .wxhours{display:flex;gap:2px;overflow-x:auto;margin:0 2px 16px;padding:8px;
+    background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:18px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .wxhours:empty{display:none}
+  .wxhours::-webkit-scrollbar{height:6px}
+  .wxhours::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .wxh{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:64px;padding:10px 6px;border-radius:13px}
+  .wxh:first-child{background:rgba(255,184,77,.1);border:1px solid color-mix(in srgb,var(--marquee) 40%,transparent)}
+  .wxh b{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.03em}
+  .wxh:first-child b{color:var(--marquee)}
+  .wxh-ico svg{width:24px;height:24px;display:block}
+  .wxh .t{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+  .wxh .p{font-size:10px;color:#5fb0ff;font-weight:700;min-height:12px;letter-spacing:.02em}
+
+  .section{margin-bottom:26px}
+  .shead{display:flex;align-items:center;gap:12px;margin:0 2px 14px;}
+  .shead b{font-size:12px;letter-spacing:.28em;color:var(--muted);font-weight:700;}
+  .shead .rule{height:1px;flex:1;background:var(--line);}
+  .shead em{width:8px;height:8px;border-radius:50%;background:var(--marquee);box-shadow:0 0 8px rgba(255,184,77,.6);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:clamp(14px,1.5vw,20px);}
+  .tile{position:relative;display:flex;flex-direction:column;gap:14px;text-decoration:none;color:var(--ink);
+    background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 20px 18px;min-height:140px;overflow:hidden;transition:transform .13s ease,border-color .2s ease;cursor:pointer;}
+  .tile::after{content:"";position:absolute;inset:-40% -40% auto auto;width:170px;height:170px;
+    background:radial-gradient(circle,var(--c,transparent) 0%,transparent 62%);opacity:.28;pointer-events:none;}
+  .tile:active{transform:scale(.975)}
+  .tile:hover{border-color:color-mix(in srgb,var(--c,#fff) 55%,var(--line))}
+  .tile .ico{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;
+    background:color-mix(in srgb,var(--c) 20%,var(--bg-0));border:1px solid color-mix(in srgb,var(--c) 45%,transparent);}
+  .tile .ico svg{width:27px;height:27px;color:var(--c);display:block}
+  .tile .name{font-size:19px;font-weight:700;margin-top:auto}
+  .tile .tag{font-size:11px;letter-spacing:.16em;color:var(--muted);font-weight:600}
+  .del{position:absolute;top:12px;right:12px;z-index:3;width:34px;height:34px;border-radius:50%;border:none;
+    background:#c0392b;color:#fff;font-size:18px;font-weight:700;display:none;place-items:center;cursor:pointer;line-height:1;}
+  body.editing .del{display:grid}
+  body.editing .tile{animation:wiggle .35s ease}
+  @keyframes wiggle{25%{transform:rotate(-.8deg)}75%{transform:rotate(.8deg)}}
+  .tile.add{align-items:center;justify-content:center;text-align:center;border-style:dashed;color:var(--muted);gap:8px;}
+  .tile.add .plus{font-size:36px;line-height:1;color:var(--marquee)}
+  .tile.add .name{margin-top:0;font-size:15px;color:var(--muted)}
+
+  dialog{border:1px solid var(--line);border-radius:20px;padding:0;background:var(--bg-1);color:var(--ink);max-width:420px;width:92%;}
+  dialog::backdrop{background:rgba(5,8,18,.66)}
+  .card{padding:26px}
+  .card h2{margin:0 0 18px;font-size:20px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:12px;letter-spacing:.14em;color:var(--muted);margin-bottom:8px;font-weight:600}
+  .field input{width:100%;padding:14px 16px;border-radius:12px;font:inherit;font-size:16px;background:var(--bg-0);border:1px solid var(--line);color:var(--ink);}
+  .field input:focus{outline:2px solid var(--marquee);outline-offset:1px}
+  .row{display:flex;gap:12px;margin-top:6px}
+  .row .btn{flex:1;justify-content:center}
+  footer{margin-top:14px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;line-height:1.7;
+    display:flex;flex-wrap:wrap;gap:8px 26px;}
+  footer b{color:#c3ccec;font-weight:650}
+  @media (max-width:560px){header{flex-wrap:wrap;gap:14px}.clock{order:3}.controls{order:2;margin-left:auto}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="bulbs"><i></i><i></i><i></i></div>
+      <div><h1>NIGHTSHIFT</h1><span>PARKED-MODE THEATRE</span></div>
+    </div>
+    <div class="wx" id="wx" title="Оновити погоду">
+      <div class="wx-ico" id="wxIco"></div>
+      <div class="wx-meta"><span id="wxTemp">—</span><small id="wxDesc">погода</small></div>
+    </div>
+    <div class="clock"><span id="time">--:--</span><small id="date">—</small></div>
+    <div class="controls">
+      <button class="btn" id="editBtn" aria-label="Edit shortcuts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit
+      </button>
+      <button class="btn primary" id="fsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 0-2 2h-3"/></svg>Full screen
+      </button>
+    </div>
+  </header>
+
+  <div class="wxhours" id="wxHours"></div>
+
+  <div class="wxstrip" id="wxStrip"></div>
+
+  <div id="sections"></div>
+
+  <footer>
+    <span><b>Full screen:</b> also try the browser's own expand button in the car.</span>
+    <span><b>Seek:</b> use the left scroll wheel to rewind / fast-forward video.</span>
+    <span><b>Heads up:</b> video only plays while parked.</span>
+  </footer>
+</div>
+
+<dialog id="dlg">
+  <div class="card">
+    <h2>Add a shortcut</h2>
+    <div class="field"><label for="tName">Name</label><input id="tName" placeholder="e.g. Crunchyroll" autocomplete="off" /></div>
+    <div class="field"><label for="tUrl">Web address</label><input id="tUrl" placeholder="https://…" autocomplete="off" inputmode="url" /></div>
+    <div class="row"><button class="btn" id="cancelBtn" type="button">Cancel</button><button class="btn primary" id="saveBtn" type="button">Add shortcut</button></div>
+  </div>
+</dialog>
+
+<script>
+const G={
+  play:'<path d="M6 4v16l14-8z"/>',
+  film:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M17 9h4M3 15h4M17 15h4" stroke-width="1.6"/>',
+  live:'<circle cx="12" cy="12" r="3"/><path d="M5.5 5.5a9 9 0 0 0 0 13M18.5 5.5a9 9 0 0 1 0 13" stroke-width="1.8" fill="none"/>',
+  music:'<circle cx="7" cy="17" r="3"/><circle cx="18" cy="15" r="3"/><path d="M10 17V6l11-2v11" fill="none" stroke-width="2"/>',
+  tv:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 21h8" stroke-width="2"/>',
+  radio:'<circle cx="12" cy="13" r="2.4"/><path d="M8.5 9.5a5 5 0 0 0 0 7M15.5 9.5a5 5 0 0 1 0 7M5.5 6.5a9 9 0 0 0 0 13M18.5 6.5a9 9 0 0 1 0 13" fill="none"/>',
+  route:'<circle cx="6" cy="7" r="2.4"/><circle cx="18" cy="17" r="2.4"/><path d="M6 9.5v3a3.5 3.5 0 0 0 3.5 3.5H15" fill="none" stroke-width="2"/>',
+  map:'<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  plug:'<path d="M9 2v5M15 2v5M7 7h10v2a5 5 0 0 1-5 5 5 5 0 0 1-5-5V7zM12 14v6"/>'
+};
+function svg(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-linecap="round" stroke-width="2">'+(G[k]||G.play)+'</svg>';}
+
+const DEFAULTS=[
+  {g:'WATCH', name:'YouTube',      url:'https://www.youtube.com',          c:'#ff3d3d', i:'play', tag:'VIDEO'},
+  {g:'WATCH', name:'Netflix',      url:'https://www.netflix.com',          c:'#e50914', i:'film', tag:'VIDEO'},
+  {g:'WATCH', name:'Twitch',       url:'https://www.twitch.tv',            c:'#a970ff', i:'live', tag:'LIVE'},
+  {g:'WATCH', name:'Sweet TV',     url:'https://sweet.tv',                 c:'#ff5a8a', i:'tv',   tag:'UA'},
+  {g:'WATCH', name:'Megogo',       url:'https://megogo.net',               c:'#ff6a2b', i:'film', tag:'UA'},
+  {g:'WATCH', name:'Kyivstar TV',  url:'https://tv.kyivstar.ua',           c:'#35a7ff', i:'tv',   tag:'UA'},
+
+  {g:'LISTEN',name:'YouTube Music',url:'https://music.youtube.com',        c:'#ff3d3d', i:'music',tag:'AUDIO'},
+  {g:'LISTEN',name:'Хіт FM',       url:'https://play.tavr.media/hitfm/ukr/',c:'#4aa3ff', i:'radio',tag:'UA · РАДІО'},
+
+  {g:'DRIVE', name:'Route Planner',url:'https://abetterrouteplanner.com',  c:'#8fd14f', i:'route',tag:'ABRP'},
+  {g:'DRIVE', name:'Waze',         url:'https://www.waze.com/live-map',    c:'#35c6ff', i:'map',  tag:'MAP'},
+  {g:'DRIVE', name:'Google Maps',  url:'https://www.google.com/maps',      c:'#4a90d9', i:'map',  tag:'MAP'},
+  {g:'DRIVE', name:'PlugShare',    url:'https://www.plugshare.com',        c:'#16c07a', i:'plug', tag:'CHARGING'}
+];
+const ORDER=['WATCH','LISTEN','DRIVE','SHORTCUTS'];
+
+const KEY='nightshift.tiles.v4';
+function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch(e){}return DEFAULTS.slice();}
+function save(l){try{localStorage.setItem(KEY,JSON.stringify(l));}catch(e){}}
+let tiles=load();
+
+const root=document.getElementById('sections');
+function render(){
+  root.innerHTML='';
+  ORDER.forEach(group=>{
+    const items=tiles.map((t,i)=>({t,i})).filter(x=>x.t.g===group);
+    if(!items.length && group!=='DRIVE') { if(!items.length) return; }
+    if(!items.length) return;
+    const sec=document.createElement('section');sec.className='section';
+    sec.innerHTML='<div class="shead"><em></em><b>'+group+'</b><span class="rule"></span></div>';
+    const grid=document.createElement('div');grid.className='grid';
+    items.forEach(({t,i})=>{
+      const a=document.createElement('a');a.className='tile';a.href=t.url;a.style.setProperty('--c',t.c);
+      a.innerHTML='<button class="del" data-i="'+i+'" aria-label="Remove">×</button>'+
+        '<div class="ico">'+svg(t.i)+'</div><div class="name">'+t.name+'</div><div class="tag">'+(t.tag||'')+'</div>';
+      a.addEventListener('click',ev=>{if(document.body.classList.contains('editing'))ev.preventDefault();});
+      grid.appendChild(a);
+    });
+    sec.appendChild(grid);root.appendChild(sec);
+  });
+  const sec=document.createElement('section');sec.className='section';
+  const grid=document.createElement('div');grid.className='grid';
+  const add=document.createElement('div');add.className='tile add';
+  add.innerHTML='<div class="plus">+</div><div class="name">Add shortcut</div>';
+  add.addEventListener('click',()=>dlg.showModal());
+  grid.appendChild(add);sec.appendChild(grid);root.appendChild(sec);
+}
+render();
+
+root.addEventListener('click',e=>{
+  const d=e.target.closest('.del');if(!d)return;
+  e.preventDefault();e.stopPropagation();
+  tiles.splice(+d.dataset.i,1);save(tiles);render();
+});
+document.getElementById('editBtn').addEventListener('click',()=>document.body.classList.toggle('editing'));
+
+const dlg=document.getElementById('dlg');
+document.getElementById('cancelBtn').onclick=()=>dlg.close();
+document.getElementById('saveBtn').onclick=()=>{
+  const name=document.getElementById('tName').value.trim();
+  let url=document.getElementById('tUrl').value.trim();
+  if(!name||!url)return;
+  if(!/^https?:\/\//i.test(url))url='https://'+url;
+  const pal=['#ff8a3d','#6aa8ff','#3ee07a','#ff5aa0','#a970ff','#3ad1c6'];
+  tiles.push({g:'SHORTCUTS',name,url,c:pal[tiles.length%pal.length],i:'play',tag:'CUSTOM'});
+  save(tiles);render();
+  document.getElementById('tName').value='';document.getElementById('tUrl').value='';dlg.close();
+};
+
+document.getElementById('fsBtn').addEventListener('click',()=>{
+  const el=document.documentElement;
+  if(document.fullscreenElement){document.exitFullscreen&&document.exitFullscreen();}
+  else if(el.requestFullscreen){el.requestFullscreen().catch(()=>{});}
+  else if(el.webkitRequestFullscreen){el.webkitRequestFullscreen();}
+});
+
+/* ---- weather (Open-Meteo, no key) ---- */
+const WX={
+ sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>',
+ sunc:'<circle cx="8" cy="8" r="3"/><path d="M8 1.8v1.6M1.8 8h1.6M3.7 3.7l1.1 1.1M12.3 3.7l-1.1 1.1"/><path d="M7 19h9a3.5 3.5 0 0 0 0-7 4.5 4.5 0 0 0-8.7-1A3.5 3.5 0 0 0 7 19z"/>',
+ cloud:'<path d="M7 18h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6-1.3A3.8 3.8 0 0 0 7 18z"/>',
+ fog:'<path d="M7 13h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6-1.3A3.8 3.8 0 0 0 7 13z"/><path d="M4 17h12M7 20h10"/>',
+ rain:'<path d="M7 15h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6-1.3A3.8 3.8 0 0 0 7 15z"/><path d="M9 18l-1 3M13 18l-1 3M17 18l-1 3"/>',
+ snow:'<path d="M7 14h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6-1.3A3.8 3.8 0 0 0 7 14z"/><path d="M9 18h.01M13 20h.01M16 18h.01M10 21h.01"/>',
+ storm:'<path d="M7 14h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6-1.3A3.8 3.8 0 0 0 7 14z"/><path d="M12 15l-2 4h3l-2 4"/>'
+};
+function wxSvg(k,color){return '<svg viewBox="0 0 24 24" fill="none" stroke="'+(color||'currentColor')+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(WX[k]||WX.cloud)+'</svg>';}
+function wxInfo(code){
+  if(code===0) return {i:'sun',  t:'Ясно',       c:'#ffd23d'};
+  if(code<=2)  return {i:'sunc', t:'Мінлива хмарність', c:'#ffcf5c'};
+  if(code===3) return {i:'cloud',t:'Хмарно',     c:'#aeb9d6'};
+  if(code<=48) return {i:'fog',  t:'Туман',       c:'#aeb9d6'};
+  if(code<=57) return {i:'rain', t:'Мряка',       c:'#5fb0ff'};
+  if(code<=67) return {i:'rain', t:'Дощ',         c:'#5fb0ff'};
+  if(code<=77) return {i:'snow', t:'Сніг',        c:'#bfe6ff'};
+  if(code<=82) return {i:'rain', t:'Зливи',       c:'#5fb0ff'};
+  if(code<=86) return {i:'snow', t:'Сніг',        c:'#bfe6ff'};
+  return {i:'storm', t:'Гроза', c:'#c9a0ff'};
+}
+function buildForecast(daily){
+  const strip=document.getElementById('wxStrip');
+  if(!daily||!daily.time){strip.innerHTML='';return;}
+  const wd=['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
+  let html='';
+  for(let i=0;i<Math.min(4,daily.time.length);i++){
+    const d=new Date(daily.time[i]+'T12:00:00');
+    const label=i===0?'СЬОГОДНІ':wd[d.getDay()].toUpperCase();
+    const info=wxInfo(daily.weather_code[i]);
+    html+='<div class="wxday"><b>'+label+'</b><div class="wxday-ico">'+wxSvg(info.i,info.c)+'</div>'+
+      '<span class="tmp">'+Math.round(daily.temperature_2m_max[i])+'°<i>'+Math.round(daily.temperature_2m_min[i])+'°</i></span></div>';
+  }
+  strip.innerHTML=html;
+}
+function buildHourly(h,curTime){
+  const box=document.getElementById('wxHours');
+  if(!h||!h.time){box.innerHTML='';return;}
+  let start=0;
+  if(curTime){const key=curTime.slice(0,13);const idx=h.time.findIndex(t=>t.slice(0,13)===key);if(idx>=0)start=idx;}
+  let html='';
+  for(let i=start;i<Math.min(start+12,h.time.length);i++){
+    const info=wxInfo(h.weather_code[i]);
+    const label=(i===start)?'Зараз':h.time[i].slice(11,13);
+    const p=h.precipitation_probability?h.precipitation_probability[i]:0;
+    const pTxt=(p>=20)?p+'%':'';
+    html+='<div class="wxh"><b>'+label+'</b><div class="wxh-ico">'+wxSvg(info.i,info.c)+'</div>'+
+      '<span class="t">'+Math.round(h.temperature_2m[i])+'°</span><span class="p">'+pTxt+'</span></div>';
+  }
+  box.innerHTML=html;
+}
+function loadWeather(lat,lon){
+  const url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
+    '&current=temperature_2m,weather_code'+
+    '&hourly=temperature_2m,weather_code,precipitation_probability'+
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=4&timezone=auto';
+  fetch(url).then(r=>r.json()).then(d=>{
+    const c=d.current; if(!c) throw 0;
+    const info=wxInfo(c.weather_code);
+    document.getElementById('wxIco').innerHTML=wxSvg(info.i,info.c);
+    document.getElementById('wxTemp').textContent=Math.round(c.temperature_2m)+'°';
+    document.getElementById('wxDesc').textContent=info.t;
+    buildHourly(d.hourly,c.time);
+    buildForecast(d.daily);
+  }).catch(()=>{document.getElementById('wxDesc').textContent='немає даних';});
+}
+function initWeather(){
+  const fallback=()=>loadWeather(51.5074,-0.1278); /* London default */
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      p=>loadWeather(p.coords.latitude,p.coords.longitude),
+      ()=>fallback(),
+      {timeout:8000,maximumAge:600000}
+    );
+  } else fallback();
+}
+initWeather();
+setInterval(initWeather,15*60*1000);
+document.getElementById('wx').addEventListener('click',initWeather);
+
+function tick(){
+  const d=new Date();
+  document.getElementById('time').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('date').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+}
+tick();setInterval(tick,1000*20);
+</script>
+</body>
+</html>
